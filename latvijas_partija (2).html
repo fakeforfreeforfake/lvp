@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzmin Partiju — Latvijas politiķi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --text-dim: #6b6660;
+    --accent: #c41e3a;
+    --accent2: #ff3355;
+    --gold: #d4a843;
+
+    --na:   #7B4A1E;
+    --prog: #dc2626;
+    --jv:   #4ade80;
+    --lpv:  #7f1d1d;
+    --sv:   #db2777;
+    --zzs:  #14532d;
+    --as:   #eab308;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo span { color: var(--accent); }
+
+  nav {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-right: 1px solid var(--border);
+  }
+  .nav-btn:last-child { border-right: none; }
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active { background: var(--accent); color: #fff; }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* ── GAME TAB ── */
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .scoreboard {
+    display: flex;
+    gap: 1px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .score-cell {
+    padding: 0.6rem 1.4rem;
+    background: var(--surface);
+    text-align: center;
+    min-width: 90px;
+  }
+  .score-cell .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .score-cell .value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem;
+    color: var(--text);
+    line-height: 1;
+  }
+  #streak-cell .value { color: var(--gold); }
+
+  .game-arena {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (max-width: 620px) {
+    .game-arena { grid-template-columns: 1fr; }
+  }
+
+  .photo-frame {
+    position: relative;
+    aspect-ratio: 3/4;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: opacity 0.3s;
+  }
+
+  .photo-frame .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 2rem;
+    text-align: center;
+  }
+  .photo-frame .empty-state svg { opacity: 0.3; }
+
+  .result-banner {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0.75rem 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
+    text-align: center;
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .result-banner.show { transform: translateY(0); }
+  .result-banner.correct { background: #14532d; color: #86efac; }
+  .result-banner.wrong { background: #7f1d1d; color: #fca5a5; }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .panel-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .party-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .party-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.12s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .party-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    transition: width 0.12s;
+  }
+  .party-btn:hover::before { width: 6px; }
+  .party-btn:hover { padding-left: 1.2rem; }
+
+  .party-btn[data-party="Nacionālā Apvienība"]::before  { background: var(--na); }
+  .party-btn[data-party="Progresīvie"]::before           { background: var(--prog); }
+  .party-btn[data-party="Jaunā Vienotība"]::before       { background: var(--jv); }
+  .party-btn[data-party="Latvija Pirmajā Vietā"]::before { background: var(--lpv); }
+  .party-btn[data-party="Suverēnā Vara / Jaunlatvieši"]::before { background: var(--sv); }
+  .party-btn[data-party="Zaļo un Zemnieku Savienība"]::before  { background: var(--zzs); }
+  .party-btn[data-party="Apvienotais Saraksts"]::before  { background: var(--as); }
+
+  .party-btn.flash-correct {
+    background: #14532d;
+    border-color: #22c55e;
+    color: #86efac;
+    animation: flashPulse 0.4s ease;
+  }
+  .party-btn.flash-wrong {
+    background: #7f1d1d;
+    border-color: #ef4444;
+    color: #fca5a5;
+    animation: flashPulse 0.4s ease;
+  }
+  .party-btn.flash-reveal {
+    background: #14532d;
+    border-color: #22c55e;
+    color: #86efac;
+  }
+
+  @keyframes flashPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .party-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  .party-btn.flash-correct:disabled,
+  .party-btn.flash-wrong:disabled,
+  .party-btn.flash-reveal:disabled {
+    opacity: 1;
+  }
+
+  .next-btn {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: none;
+    margin-top: 0.3rem;
+  }
+  .next-btn:hover { background: var(--accent2); }
+  .next-btn.visible { display: block; }
+
+  .game-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── ADMIN TAB ── */
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 620px) {
+    .admin-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+  }
+
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+  }
+  .field input[type="text"],
+  .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    appearance: none;
+    transition: border-color 0.15s;
+  }
+  .field input[type="text"]:focus,
+  .field select:focus { border-color: var(--accent); }
+
+  .field select option { background: #1f1f1f; }
+
+  .upload-zone {
+    border: 1px dashed var(--border);
+    background: var(--bg);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--accent); }
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .upload-zone .upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .upload-zone .upload-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .preview-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: top;
+    display: none;
+    border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+  }
+
+  .save-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    padding: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 0.5rem;
+  }
+  .save-btn:hover { background: var(--accent2); }
+  .save-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+
+  .success-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: #86efac;
+    letter-spacing: 0.06em;
+    text-align: center;
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+  }
+
+  /* ── ARCHIVE TAB ── */
+  .archive-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .archive-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid #7f1d1d;
+    color: #fca5a5;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { background: #7f1d1d; }
+
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .archive-card {
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .archive-card img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+  .archive-card .info {
+    padding: 0.5rem 0.6rem;
+    flex: 1;
+  }
+  .archive-card .politician-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+  }
+  .archive-card .party-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.4rem;
+    display: inline-block;
+  }
+  .archive-card .delete-card {
+    position: absolute;
+    top: 0.3rem; right: 0.3rem;
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: #fca5a5;
+    width: 22px; height: 22px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .archive-card:hover .delete-card { opacity: 1; }
+
+  .empty-archive {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    line-height: 2;
+  }
+
+  /* page heading */
+  .page-heading {
+    margin-bottom: 2rem;
+  }
+  .page-heading h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .page-heading h1 span { color: var(--accent); }
+  .page-heading p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-top: 0.4rem;
+  }
+
+  /* party color helpers */
+  [data-pcolor="na"]   { background: color-mix(in srgb, var(--na) 25%, transparent); color: #d4a574; border-color: var(--na); }
+  [data-pcolor="prog"] { background: color-mix(in srgb, var(--prog) 20%, transparent); color: #fca5a5; border-color: var(--prog); }
+  [data-pcolor="jv"]   { background: color-mix(in srgb, var(--jv) 15%, transparent); color: #4ade80; border-color: var(--jv); }
+  [data-pcolor="lpv"]  { background: color-mix(in srgb, var(--lpv) 25%, transparent); color: #fca5a5; border-color: var(--lpv); }
+  [data-pcolor="sv"]   { background: color-mix(in srgb, var(--sv) 20%, transparent); color: #f9a8d4; border-color: var(--sv); }
+  [data-pcolor="zzs"]  { background: color-mix(in srgb, var(--zzs) 25%, transparent); color: #86efac; border-color: var(--zzs); }
+  [data-pcolor="as"]   { background: color-mix(in srgb, var(--as) 20%, transparent); color: #fde047; border-color: var(--as); }
+
+  .export-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-block;
+  }
+  .export-btn:hover { color: var(--text); border-color: var(--gold); }
+  .import-btn:hover { color: var(--text); border-color: var(--gold); }
+
+  .import-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    min-height: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Uzmin <span>Partiju</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('game')">🎮 Spēle</button>
+    <button class="nav-btn" onclick="switchTab('admin')">➕ Pievienot</button>
+    <button class="nav-btn" onclick="switchTab('archive')">📁 Arhīvs</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ══════════════ GAME TAB ══════════════ -->
+  <div id="tab-game" class="tab active">
+    <div class="game-header">
+      <div class="page-heading" style="margin-bottom:0">
+        <h1>Kurš ir <span>kurš?</span></h1>
+        <p>Uzmin, kurā partijā ir šis politiķis</p>
+      </div>
+      <div class="scoreboard">
+        <div class="score-cell">
+          <span class="label">Rezultāts</span>
+          <span class="value" id="score-display">0/0</span>
+        </div>
+        <div class="score-cell" id="streak-cell">
+          <span class="label">Sērija</span>
+          <span class="value" id="streak-display">0</span>
+        </div>
+        <div class="score-cell">
+          <span class="label">Rekords</span>
+          <span class="value" id="best-display">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-arena">
+      <div class="photo-frame" id="photo-frame">
+        <div class="empty-state" id="empty-state">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          <span>Vispirms pievieno<br>politiķus sadaļā<br>"Pievienot"</span>
+        </div>
+        <img id="game-img" src="" alt="" style="display:none">
+        <div class="result-banner" id="result-banner"></div>
+      </div>
+
+      <div class="right-panel">
+        <div class="panel-title">Izvēlies partiju</div>
+        <div class="party-buttons" id="party-buttons">
+          <!-- generated by JS -->
+        </div>
+        <button class="next-btn" id="next-btn" onclick="nextPolitician()">Nākamais →</button>
+        <div class="game-meta" id="game-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ ADMIN TAB ══════════════ -->
+  <div id="tab-admin" class="tab">
+    <div class="page-heading">
+      <h1>Pievienot <span>politiķi</span></h1>
+      <p>Augšupielādē attēlu un norādi partiju</p>
+    </div>
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-title">Jaunais ieraksts</div>
+
+        <div class="field">
+          <label>Vārds Uzvārds</label>
+          <input type="text" id="admin-name" placeholder="piemēram, Jānis Bērziņš">
+        </div>
+
+        <div class="field">
+          <label>Partija</label>
+          <select id="admin-party">
+            <option value="">— izvēlies partiju —</option>
+            <option value="Nacionālā Apvienība">Nacionālā Apvienība</option>
+            <option value="Progresīvie">Progresīvie</option>
+            <option value="Jaunā Vienotība">Jaunā Vienotība</option>
+            <option value="Latvija Pirmajā Vietā">Latvija Pirmajā Vietā</option>
+            <option value="Suverēnā Vara / Jaunlatvieši">Suverēnā Vara / Jaunlatvieši</option>
+            <option value="Zaļo un Zemnieku Savienība">Zaļo un Zemnieku Savienība</option>
+            <option value="Apvienotais Saraksts">Apvienotais Saraksts</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Foto</label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="admin-file" accept="image/*" onchange="handleFileSelect(event)">
+            <span class="upload-icon">📷</span>
+            <span class="upload-text">Klikšķini vai velc šurp attēlu<br>JPG / PNG / WEBP</span>
+          </div>
+          <img id="preview-img" class="preview-img" alt="priekšskatījums">
+        </div>
+
+        <button class="save-btn" id="save-btn" onclick="savePolitician()">Saglabāt</button>
+        <div class="success-msg" id="success-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pamācība</div>
+        <div style="font-size:0.82rem; line-height:1.8; color: var(--text-dim);">
+          <p style="margin-bottom:0.8rem;">
+            <strong style="color:var(--text)">1.</strong> Augšupielādē politiķa portretu (ideāli — vienpersonu foto ar skaidri redzamu seju).
+          </p>
+          <p style="margin-bottom:0.8rem;">
+            <strong style="color:var(--text)">2.</strong> Ievadi vārdu un uzvārdu — tas tiks rādīts pēc atbildes.
+          </p>
+          <p style="margin-bottom:0.8rem;">
+            <strong style="color:var(--text)">3.</strong> Izvēlies pareizo partiju un saglabā.
+          </p>
+          <p style="margin-bottom:0.8rem;">
+            <strong style="color:var(--text)">4.</strong> Spēlē sadaļā <em>"Spēle"</em>!
+          </p>
+          <hr class="divider">
+          <p style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.06em;">
+            Visi dati tiek glabāti tikai šajā pārlūkā (localStorage). Notīrot pārlūka datus, arhīvs tiks dzēsts. Izmanto <em>Eksportēt / Importēt</em> sadaļā "Arhīvs", lai saglabātu vai pārsūtītu datus starp ierīcēm.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ ARCHIVE TAB ══════════════ -->
+  <div id="tab-archive" class="tab">
+    <div class="archive-bar">
+      <div>
+        <div class="page-heading" style="margin-bottom:0">
+          <h1>Arhīvs</h1>
+        </div>
+        <div class="archive-count" id="archive-count" style="margin-top:0.3rem"></div>
+      </div>
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+        <button class="export-btn" onclick="exportArchive()">⬇ Eksportēt</button>
+        <label class="export-btn import-btn" style="cursor:pointer;">
+          ⬆ Importēt
+          <input type="file" id="import-file" accept=".json" onchange="importArchive(event)" style="display:none">
+        </label>
+        <button class="clear-btn" onclick="clearAll()">Notīrīt visu</button>
+      </div>
+    </div>
+    <div class="import-msg" id="import-msg"></div>
+    <div id="archive-container"></div>
+  </div>
+
+</main>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const STORAGE_KEY = 'latvijas_partija_v1';
+
+const PARTY_COLORS = {
+  'Nacionālā Apvienība':          'na',
+  'Progresīvie':                  'prog',
+  'Jaunā Vienotība':              'jv',
+  'Latvija Pirmajā Vietā':        'lpv',
+  'Suverēnā Vara / Jaunlatvieši': 'sv',
+  'Zaļo un Zemnieku Savienība':   'zzs',
+  'Apvienotais Saraksts':         'as',
+};
+
+const PARTIES = Object.keys(PARTY_COLORS);
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+function save(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ─── STATE ──────────────────────────────────────────────
+let politicians = load();
+let score = 0, total = 0, streak = 0, best = 0;
+let current = null;
+let answered = false;
+let selectedFile = null;
+
+// ─── TABS ───────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'archive') renderArchive();
+}
+
+// ─── GAME ───────────────────────────────────────────────
+function buildPartyButtons() {
+  const container = document.getElementById('party-buttons');
+  container.innerHTML = '';
+  PARTIES.forEach(party => {
+    const btn = document.createElement('button');
+    btn.className = 'party-btn';
+    btn.dataset.party = party;
+    btn.textContent = party;
+    btn.onclick = () => guess(party);
+    container.appendChild(btn);
+  });
+}
+
+function nextPolitician() {
+  if (!politicians.length) return;
+  const idx = Math.floor(Math.random() * politicians.length);
+  current = politicians[idx];
+  answered = false;
+
+  const img = document.getElementById('game-img');
+  const emptyState = document.getElementById('empty-state');
+  const banner = document.getElementById('result-banner');
+  const nextBtn = document.getElementById('next-btn');
+  const meta = document.getElementById('game-meta');
+
+  img.style.opacity = '0';
+  img.onload = () => { img.style.opacity = '1'; };
+  img.src = current.image;
+  img.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  banner.className = 'result-banner';
+  banner.textContent = '';
+  nextBtn.classList.remove('visible');
+  meta.textContent = '';
+
+  // reset buttons
+  document.querySelectorAll('.party-btn').forEach(b => {
+    b.className = 'party-btn';
+    b.disabled = false;
+  });
+}
+
+function guess(party) {
+  if (answered) return;
+  answered = true;
+  total++;
+
+  const correct = party === current.party;
+  if (correct) {
+    score++;
+    streak++;
+    if (streak > best) best = streak;
+  } else {
+    streak = 0;
+  }
+
+  updateScore();
+
+  // button feedback
+  document.querySelectorAll('.party-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.party === current.party) b.classList.add('flash-reveal');
+    else if (b.dataset.party === party && !correct) b.classList.add('flash-wrong');
+  });
+
+  // result banner
+  const banner = document.getElementById('result-banner');
+  banner.textContent = correct ? `✓ Pareizi! — ${current.name}` : `✗ Nē — ${current.name} (${current.party})`;
+  banner.className = 'result-banner ' + (correct ? 'correct' : 'wrong') + ' show';
+
+  document.getElementById('next-btn').classList.add('visible');
+}
+
+function updateScore() {
+  document.getElementById('score-display').textContent = score + '/' + total;
+  document.getElementById('streak-display').textContent = streak;
+  document.getElementById('best-display').textContent = best;
+}
+
+function initGame() {
+  politicians = load();
+  buildPartyButtons();
+  if (politicians.length) {
+    nextPolitician();
+  }
+}
+
+// ─── IMAGE COMPRESSION ──────────────────────────────────
+// Resizes + JPEG-compresses any image to max 320×420px, ~30–60 KB each.
+// 55 politicians × ~50 KB = ~2.75 MB — well within localStorage's 5 MB limit.
+function compressImage(file, maxW, maxH, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width, maxH / img.height);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function storageUsedKB() {
+  let total = 0;
+  for (const key in localStorage) {
+    if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+      total += (localStorage[key].length + key.length) * 2;
+    }
+  }
+  return Math.round(total / 1024);
+}
+
+function updateStorageMeter() {
+  const used = storageUsedKB();
+  const pct = Math.min(100, Math.round(used / 5120 * 100));
+  const el = document.getElementById('storage-meter');
+  const bar = document.getElementById('storage-bar');
+  if (!el) return;
+  el.textContent = `Atmiņa: ${used} KB / ~5120 KB (${pct}%)`;
+  if (bar) {
+    bar.style.width = pct + '%';
+    bar.style.background = pct > 85 ? '#ef4444' : pct > 60 ? '#eab308' : '#22c55e';
+  }
+}
+
+// ─── ADMIN ──────────────────────────────────────────────
+async function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  selectedFile = file;
+  try {
+    const compressed = await compressImage(file, 320, 420, 0.75);
+    const prev = document.getElementById('preview-img');
+    prev.src = compressed;
+    prev.style.display = 'block';
+    const kb = Math.round(compressed.length * 0.75 / 1024);
+    document.querySelector('.upload-zone .upload-text').textContent = `${file.name} → ~${kb} KB`;
+  } catch {
+    document.querySelector('.upload-zone .upload-text').textContent = file.name;
+  }
+}
+
+async function savePolitician() {
+  const name = document.getElementById('admin-name').value.trim();
+  const party = document.getElementById('admin-party').value;
+  const msg = document.getElementById('success-msg');
+
+  if (!name) { msg.style.color = '#fca5a5'; msg.textContent = '✗ Ievadi vārdu!'; return; }
+  if (!party) { msg.style.color = '#fca5a5'; msg.textContent = '✗ Izvēlies partiju!'; return; }
+  if (!selectedFile) { msg.style.color = '#fca5a5'; msg.textContent = '✗ Pievienojam foto!'; return; }
+
+  msg.style.color = 'var(--text-dim)';
+  msg.textContent = '⏳ Saglabā...';
+
+  let imageData;
+  try {
+    imageData = await compressImage(selectedFile, 320, 420, 0.75);
+  } catch {
+    msg.style.color = '#fca5a5';
+    msg.textContent = '✗ Neizdevās apstrādāt attēlu.';
+    return;
+  }
+
+  const entry = {
+    id: Date.now(),
+    name,
+    party,
+    image: imageData
+  };
+  politicians = load();
+  politicians.push(entry);
+
+  try {
+    save(politicians);
+  } catch (e) {
+    // QuotaExceededError
+    msg.style.color = '#fca5a5';
+    msg.textContent = '✗ Atmiņa pilna! Eksportē arhīvu un notīri datus.';
+    politicians.pop();
+    return;
+  }
+
+    // reset form
+  document.getElementById('admin-name').value = '';
+  document.getElementById('admin-party').value = '';
+  document.getElementById('admin-file').value = '';
+  document.getElementById('preview-img').style.display = 'none';
+  document.querySelector('.upload-zone .upload-text').textContent = 'Klikšķini vai velc šurp attēlu\nJPG / PNG / WEBP';
+  selectedFile = null;
+
+  msg.style.color = '#86efac';
+  msg.textContent = `✓ ${name} saglabāts!`;
+  setTimeout(() => { msg.textContent = ''; updateStorageMeter(); }, 3000);
+  updateStorageMeter();
+
+  // refresh game state
+  if (politicians.length === 1) initGame();
+}
+
+// ─── ARCHIVE ────────────────────────────────────────────
+function renderArchive() {
+  politicians = load();
+  const container = document.getElementById('archive-container');
+  const countEl = document.getElementById('archive-count');
+  countEl.textContent = politicians.length + ' politiķi arhīvā';
+
+  if (!politicians.length) {
+    container.innerHTML = '<div class="empty-archive">Arhīvs ir tukšs.<br>Pievieno politiķus sadaļā "Pievienot".</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="archive-grid">' +
+    politicians.map(p => `
+      <div class="archive-card">
+        <img src="${p.image}" alt="${p.name}">
+        <button class="delete-card" onclick="deletePolitician(${p.id})" title="Dzēst">✕</button>
+        <div class="info">
+          <div class="politician-name">${p.name}</div>
+          <div class="party-tag" data-pcolor="${PARTY_COLORS[p.party] || ''}">${p.party}</div>
+        </div>
+      </div>
+    `).join('') +
+  '</div>';
+}
+
+function deletePolitician(id) {
+  if (!confirm('Dzēst šo politiķi?')) return;
+  politicians = load().filter(p => p.id !== id);
+  save(politicians);
+  renderArchive();
+}
+
+function clearAll() {
+  if (!confirm('Vai tiešām notīrīt visu arhīvu?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  politicians = [];
+  renderArchive();
+  // reset game
+  document.getElementById('game-img').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('result-banner').className = 'result-banner';
+  document.getElementById('next-btn').classList.remove('visible');
+  score = 0; total = 0; streak = 0; best = 0;
+  updateScore();
+}
+
+// ─── EXPORT / IMPORT ────────────────────────────────────
+function exportArchive() {
+  const data = load();
+  if (!data.length) { alert('Arhīvs ir tukšs — nav ko eksportēt!'); return; }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'latvijas_partija_arhivs.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importArchive(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const msg = document.getElementById('import-msg');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('Nepareizs formāts');
+      // validate entries
+      const valid = imported.filter(p => p.id && p.name && p.party && p.image);
+      if (!valid.length) throw new Error('Nav derīgu ierakstu');
+
+      const existing = load();
+      const existingIds = new Set(existing.map(p => p.id));
+      const merged = [...existing];
+      let added = 0;
+      valid.forEach(p => {
+        if (!existingIds.has(p.id)) { merged.push(p); added++; }
+      });
+      save(merged);
+      politicians = merged;
+      msg.style.color = '#86efac';
+      msg.textContent = `✓ Importēts: ${added} jauni ieraksti (${valid.length - added} jau bija).`;
+      setTimeout(() => msg.textContent = '', 5000);
+      renderArchive();
+      // reset file input so same file can be imported again if needed
+      event.target.value = '';
+    } catch(err) {
+      msg.style.color = '#fca5a5';
+      msg.textContent = '✗ Kļūda: nepareizs fails. (' + err.message + ')';
+      setTimeout(() => msg.textContent = '', 5000);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─── INIT ───────────────────────────────────────────────
+initGame();
+</script>
+</body>
+</html>
